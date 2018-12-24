@@ -45,6 +45,13 @@ namespace Day1
     {
         static void Main(string[] args)
         {
+
+            Console.WriteLine("press any key to exit.");
+            Console.ReadKey();
+        }
+
+        static void Day3()
+        {
             var lines = File.ReadAllLines(@"..\..\input3.txt");
             Dictionary<Point, List<Claim>> fabric = new Dictionary<Point, List<Claim>>();
 
@@ -103,9 +110,6 @@ namespace Day1
                     break;
                 }
             }
-
-            Console.WriteLine("press any key to exit.");
-            Console.ReadKey();
         }
 
         static void Day2b()
