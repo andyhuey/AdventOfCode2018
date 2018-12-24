@@ -3,13 +3,79 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Day1
 {
+    struct Claim
+    {
+        public int n, x, y, w, h;
+
+        public Claim(List<string> numbers)
+        {
+            n = int.Parse(numbers[0]);
+            x = int.Parse(numbers[1]);
+            y = int.Parse(numbers[2]);
+            w = int.Parse(numbers[3]);
+            h = int.Parse(numbers[4]);
+        }
+        public override string ToString()
+        {
+            return string.Format("#{0} @ {1},{2}: {3}x{4}", n, x, y, w, h);
+        }
+    }
+
+    struct Point
+    {
+        public int x, y;
+
+        public Point(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
     class Program
     {
         static void Main(string[] args)
+        {
+            var lines = File.ReadAllLines(@"..\..\input3.txt");
+            Dictionary<Point, int> fabric = new Dictionary<Point, int>();
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                //if (i > 4) break;
+                // input line looks like: "#n @ x,y: wxh"
+                string[] output = Regex.Split(lines[i], @"\D+");
+                var numbers = new List<string>(output).Where(s => !string.IsNullOrEmpty(s)).ToList();
+                if (numbers.Count() != 5)
+                    throw new Exception(string.Format("Expecting 5 values in string. Found {0}.", numbers.Count()));
+                Claim c = new Claim(numbers);
+                Console.WriteLine(c.ToString());
+
+                // map this claim to the fabric.
+                for (int x = c.x; x < c.x + c.w; x++)
+                    for (int y = c.y; y < c.y + c.h; y++)
+                    {
+                        // mark it.
+                        Point p = new Point(x, y);
+                        if (fabric.ContainsKey(p))
+                            fabric[p]++;
+                        else
+                            fabric.Add(p, 1);
+                    }
+            }
+
+            int overlapping_squares = fabric.Where(sq => sq.Value >= 2).Count();
+            Console.WriteLine("overlapping squares: {0}", overlapping_squares);     // 101469
+
+            Console.WriteLine("press any key to exit.");
+            Console.ReadKey();
+        }
+
+        static void Day2b()
         {
             var lines = File.ReadAllLines(@"..\..\input2.txt");
 
@@ -45,8 +111,6 @@ namespace Day1
                 box2: mkwcdflathzwsvjxrevymbdpoq
                 common letters: mkcdflathzwsvjxrevymbdpoq
             */
-            Console.WriteLine("press any key to exit.");
-            Console.ReadKey();
         }
 
         static void Day2a()
