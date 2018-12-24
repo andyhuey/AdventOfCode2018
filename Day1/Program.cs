@@ -35,6 +35,10 @@ namespace Day1
             this.x = x;
             this.y = y;
         }
+        public override string ToString()
+        {
+            return string.Format("x={0}, y={1}", x, y);
+        }
     }
 
     class Program
@@ -42,8 +46,10 @@ namespace Day1
         static void Main(string[] args)
         {
             var lines = File.ReadAllLines(@"..\..\input3.txt");
-            Dictionary<Point, int> fabric = new Dictionary<Point, int>();
+            Dictionary<Point, List<Claim>> fabric = new Dictionary<Point, List<Claim>>();
 
+            Console.WriteLine("Setting up the claim list...");
+            List<Claim> allClaims = new List<Claim>();
             for (int i = 0; i < lines.Length; i++)
             {
                 //if (i > 4) break;
@@ -53,23 +59,50 @@ namespace Day1
                 if (numbers.Count() != 5)
                     throw new Exception(string.Format("Expecting 5 values in string. Found {0}.", numbers.Count()));
                 Claim c = new Claim(numbers);
-                Console.WriteLine(c.ToString());
+                //Console.WriteLine(c.ToString());
+                allClaims.Add(c);
+            }
 
+            Console.WriteLine("Setting up the fabric map...");
+            foreach (Claim c in allClaims)
+            {
                 // map this claim to the fabric.
                 for (int x = c.x; x < c.x + c.w; x++)
                     for (int y = c.y; y < c.y + c.h; y++)
                     {
                         // mark it.
                         Point p = new Point(x, y);
-                        if (fabric.ContainsKey(p))
-                            fabric[p]++;
-                        else
-                            fabric.Add(p, 1);
+                        if (!fabric.ContainsKey(p))
+                            fabric.Add(p, new List<Claim>());
+                        fabric[p].Add(c);
                     }
             }
 
-            int overlapping_squares = fabric.Where(sq => sq.Value >= 2).Count();
-            Console.WriteLine("overlapping squares: {0}", overlapping_squares);     // 101469
+            //int overlapping_squares = fabric.Where(sq => sq.Value.Count() >= 2).Count();
+            //Console.WriteLine("overlapping squares: {0}", overlapping_squares);     // 101469
+
+            Console.WriteLine("Checking each claim for overlap...");
+            foreach (Claim c in allClaims)
+            {
+                bool overlap = false;
+
+                for (int x = c.x; x < c.x + c.w; x++)
+                    for (int y = c.y; y < c.y + c.h; y++)
+                    {
+                        Point p = new Point(x, y);
+                        var sq = fabric[p];
+                        if (sq.Count() > 1)
+                        {
+                            overlap = true;
+                            break;
+                        }
+                    }
+                if (!overlap)
+                {
+                    Console.WriteLine("No overlap: {0}", c);    //  #1067 @ 668,880: 12x24
+                    break;
+                }
+            }
 
             Console.WriteLine("press any key to exit.");
             Console.ReadKey();
